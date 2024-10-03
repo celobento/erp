@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Grupo {
+  id                  Int                   @id @default(autoincrement())
+  nome                String                @map("nome")
+  status              Boolean
+  GrupoAcesso         GrupoAcesso[]
+  UsuarioGrupoAcesso  UsuarioGrupoAcesso[]
+  UsuarioAutenticacao UsuarioAutenticacao[]
+
+  @@map("grupo")
+}
+
+model Modulo {
+  id     Int      @id @default(autoincrement())
+  nome   String   @map("nome")
+  Perfil Perfil[]
+
+  @@map("modulo")
+}
+
+model Perfil {
+  id            Int           @id @default(autoincrement())
+  nome          String        @map("nome")
+  discriminacao String
+  role          String
+  status        Boolean
+  modulo        Modulo        @relation(fields: [idModulo], references: [id])
+  idModulo      Int
+  GrupoAcesso   GrupoAcesso[]
+
+  @@map("perfil")
+}
+
+model GrupoAcesso {
+  id       Int     @id @default(autoincrement())
+  status   Boolean
+  perfil   Perfil  @relation(fields: [idPerfil], references: [id])
+  idPerfil Int     @map("idperfil")
+  grupo    Grupo   @relation(fields: [idGrupo], references: [id])
+  idGrupo  Int     @map("idgrupo")
+
+  @@map("grupoacesso")
+}
+
+model Usuario {
+  id                  Int                   @id @default(autoincrement())
+  nome                String                @map("nome")
+  apelido             String
+  datacadastro        DateTime
+  login               String
+  senha               String
+  status              Boolean
+  email               String
+  tentativas          Int
+  ultimoacesso        DateTime
+  ultimasenha         String
+  primeiroacesso      Boolean
+  acessotipo          Int
+  UsuarioGrupoAcesso  UsuarioGrupoAcesso[]
+  UsuarioAutenticacao UsuarioAutenticacao[]
+
+  @@map("usuario")
+}
+
+model UsuarioGrupoAcesso {
+  id              Int      @id @default(autoincrement())
+  dataativacao    DateTime
+  status          Boolean
+  usuarioativacao String
+  grupo           Grupo    @relation(fields: [idGrupo], references: [id])
+  idGrupo         Int      @map("idgrupo")
+  usuario         Usuario  @relation(fields: [idUsuario], references: [id])
+  idUsuario       Int      @map("idusuario")
+
+  @@map("usuariogrupoacesso")
+}
+
+model UsuarioAutenticacao {
+  id              Int      @id @default(autoincrement())
+  dataativacao    DateTime
+  status          Boolean
+  usuarioativacao String
+  perfil          Grupo    @relation(fields: [idPerfil], references: [id])
+  idPerfil        Int      @map("idperfil")
+  usuario         Usuario  @relation(fields: [idUsuario], references: [id])
+  idUsuario       Int      @map("idusuario")
+
+  @@map("usuarioauthenticacao")
+}

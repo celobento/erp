@@ -61,7 +61,7 @@ model Usuario {
   nome                String                @map("nome")
   apelido             String
   datacadastro        DateTime
-  login               String
+  login               String                @unique
   senha               String
   status              Boolean
   email               String
